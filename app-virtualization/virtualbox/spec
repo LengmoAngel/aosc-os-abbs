@@ -1,10 +1,11 @@
-VER=7.2.14
+VER=7.2.18
 # Note: Sometimes Oracle seems to release fix-up tarballs.
-UBUNTU_VBOX_VER="174565~Ubuntu~resolute"
+UBUNTU_VBOX_VER="175117~Ubuntu~resolute"
 SRCS="tbl::https://download.virtualbox.org/virtualbox/${VER%%[a-z]*}/VirtualBox-${VER}.tar.bz2 \
       file::rename=virtualbox.deb::https://download.virtualbox.org/virtualbox/${VER%%[a-z]*}/virtualbox-${VER%.*}_${VER%%[a-z]*}-${UBUNTU_VBOX_VER}_amd64.deb \
       file::rename=VBoxGuestAdditions.iso::https://download.virtualbox.org/virtualbox/${VER%%[a-z]*}/VBoxGuestAdditions_${VER%%[a-z]*}.iso"
-CHKSUMS="sha256::384f293184c52fd51bc941c17d753b4019446f53a6b07c828adfb3e61fe0a500 \
-         sha256::b60b940ca59780652bf601abe44d7e22ea364da651f492f8406bf4ad9d25e138 \
-         sha256::4f51a073296de31cce53924860549149be5dc339f65dcd1dbf34fd7accefe8fb"
+CHKSUMS="sha256::06db4060caadc70346335c0a731ca6667cdabf206de289c64f3f96f2d341b9d0 \
+         sha256::78a5c1a35ac8c77b9c72154e8b7b0cff065b8b2266635600c629d35f1a8869f0 \
+         sha256::346ea2b9ed47bb954464af83835b14bd8afa5fc1864f34e2561ed923fb74981c"
 CHKUPDATE="anitya::id=14449"
+REL=1

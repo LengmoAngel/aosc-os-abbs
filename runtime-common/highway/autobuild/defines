@@ -2,7 +2,10 @@ PKGNAME=highway
 PKGSEC=libs
 PKGDEP="gcc-runtime"
 BUILDDEP="gtest"
-PKGDES="A C++ library that provides portable SIMD/vector intrinsics"
+PKGDES="C++ library to provide portable SIMD/vector intrinsics"
+BUILDDEP__LOONGSON3="${BUILDDEP} llvm"
+BUILDDEP__LOONGARCH64_NOSIMD="${BUILDDEP} llvm"
+BUILDDEP__RISCV64="${BUILDDEP} llvm"
 
 ABTYPE=cmakeninja
 # NOTE: Set HWY_ENABLE_TESTS=ON to generate hwy_gtest.h for libjxl.
@@ -17,7 +20,7 @@ CMAKE_AFTER__ARMV7HF=(
     "-DHWY_CMAKE_ARM7=ON"
 )
 
-# FIXME: lto1: fatal error: target specific builtin not available.
-NOLTO__RISCV64=1
-
+USECLANG__LOONGSON3=1
+USECLANG__LOONGARCH64_NOSIMD=1
+USECLANG__RISCV64=1
 PKGBREAK="libjxl<=0.7.0"

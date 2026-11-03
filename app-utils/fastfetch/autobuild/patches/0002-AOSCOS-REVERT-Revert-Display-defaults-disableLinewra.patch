@@ -1,0 +1,35 @@
+From aac602bb67a464ca7eebf8ae7f2f498c69fe6c8f Mon Sep 17 00:00:00 2001
+From: Mingcong Bai <jeffbai@aosc.io>
+Date: Sun, 2 Aug 2026 01:36:08 +0800
+Subject: [PATCH 2/2] AOSCOS: REVERT: Revert "Display: defaults
+ `disableLinewrap` to `false`"
+
+This reverts commit 104b33c1f7dd79c1482c364cc38723747e079a34.
+
+Signed-off-by: Mingcong Bai <jeffbai@aosc.io>
+Signed-off-by: Kaiyang Wu <origincode@aosc.io>
+---
+ src/options/display.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/options/display.c b/src/options/display.c
+index 25d807efe..0a92f1dae 100644
+--- a/src/options/display.c
++++ b/src/options/display.c
+@@ -955,9 +955,11 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
+ 
+     options->showErrors = false;
+     options->pipe = !ffIsTerminal(STDOUT_FILENO) || !!getenv("NO_COLOR");
+-    options->disableLinewrap = false;
+ 
+-#ifndef NDEBUG
++#ifdef NDEBUG
++    options->disableLinewrap = !options->pipe;
++#else
++    options->disableLinewrap = false;
+     options->debugMode = !!getenv("FF_DEBUG");
+ #endif
+ 
+-- 
+2.56.0
+

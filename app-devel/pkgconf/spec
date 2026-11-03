@@ -1,4 +1,4 @@
-VER=3.0.5
+VER=3.0.9
 SRCS="tbl::https://distfiles.ariadne.space/pkgconf/pkgconf-$VER.tar.xz"
-CHKSUMS="sha256::3acd3a8a3cce65a8d620321855d92fb602e026cbe8e13ee36bdec58483b59ace"
+CHKSUMS="sha256::6ab2d3b8087dcf500e34003a6a8934dca55d0a3d6066aeafb03c352db3e68bfd"
 CHKUPDATE="anitya::id=12753"

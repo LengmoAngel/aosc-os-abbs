@@ -5,7 +5,8 @@
 _targets="i686-w64-mingw32 x86_64-w64-mingw32"
 
 for _target in ${_targets}; do
-    mkdir -p $SRCDIR/gcc-build-${_target} && cd $SRCDIR/gcc-build-${_target}
+    mkdir -pv "$SRCDIR"/gcc-build-${_target}
+    cd "$SRCDIR"/gcc-build-${_target}
     if [[ "${_target}" == "i686-w64-mingw32" ]]; then
         echo 'AOSC OS, optenv(w64-i686)' > "$SRCDIR"/gcc/DEV-PHASE
         EXTRA_OPTS="--disable-sjlj-exceptions --with-dwarf2"
@@ -13,7 +14,7 @@ for _target in ${_targets}; do
         EXTRA_OPTS="" 
         echo 'AOSC OS, optenv(w64-x64)' > "$SRCDIR"/gcc/DEV-PHASE
     fi
-    $SRCDIR/configure --prefix=/opt/w64 --libexecdir=/opt/w64/lib \
+    "$SRCDIR"/configure --prefix=/opt/w64 --libexecdir=/opt/w64/lib \
                       --target=${_target} \
                       --enable-languages=c,c++,lto,fortran \
                       --enable-shared --enable-static \
@@ -30,16 +31,16 @@ for _target in ${_targets}; do
                       --enable-year2038 --enable-nls
     make all AS_FOR_TARGET="${_target}-as" \
              LD_FOR_TARGET="${_target}-ld"
-    make install DESTDIR=$PKGDIR
-    ${_target}-strip $PKGDIR/opt/w64/${_target}/lib/*.dll
-    strip $PKGDIR/opt/w64/bin/${_target}-*
-    strip $PKGDIR/opt/w64/lib/gcc/${_target}/$PKGVER/{cc1*,collect2,f951,lto*}
-    ln -s ${_target}-gcc $PKGDIR/opt/w64/bin/${_target}-cc
+    make install DESTDIR="$PKGDIR"
+    ${_target}-strip "$PKGDIR"/opt/w64/${_target}/lib/*.dll
+    strip "$PKGDIR"/opt/w64/bin/${_target}-*
+    strip "$PKGDIR"/opt/w64/lib/gcc/${_target}/"$PKGVER"/{cc1*,collect2,f951,lto*}
+    ln -sv ${_target}-gcc "$PKGDIR"/opt/w64/bin/${_target}-cc
 
-    mkdir -p $PKGDIR/opt/w64/${_target}/bin/
-    mv $PKGDIR/opt/w64/${_target}/lib/*.dll $PKGDIR/opt/w64/${_target}/bin/
+    mkdir -pv "$PKGDIR"/opt/w64/${_target}/bin/
+    mv -v "$PKGDIR"/opt/w64/${_target}/lib/*.dll "$PKGDIR"/opt/w64/${_target}/bin/
 done
 
-rm -r $PKGDIR/opt/w64/share
-rm -f $PKGDIR/opt/w64/lib/libcc1.so*
-rm -f $PKGDIR/opt/w64/lib/libcc1.a
+rm -rv "$PKGDIR"/opt/w64/share
+rm -fv "$PKGDIR"/opt/w64/lib/libcc1.so*
+rm -fv "$PKGDIR"/opt/w64/lib/libcc1.a

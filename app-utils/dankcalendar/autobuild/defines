@@ -1,0 +1,8 @@
+PKGNAME=dankcalendar
+PKGSEC=utils
+PKGDEP="dux-calendar"
+PKGDEP__LOONGSON3=""
+PKGDES="Transitional package for dux-calendar"
+
+ABTYPE=dummy
+ABHOST=noarch

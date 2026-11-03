@@ -1,70 +1,56 @@
-From 30db0915cc61e262c74cc9c7fdf47cfd45b0deb1 Mon Sep 17 00:00:00 2001
+From 32a5938c55ef8202043c533c53e4de804f06ab38 Mon Sep 17 00:00:00 2001
 From: Kaiyang Wu <self@origincode.me>
 Date: Tue, 6 May 2025 20:34:14 -0700
 Subject: [PATCH 3/4] AOSCOS: add zh_CN and zh_TW translations for oma
 
 Signed-off-by: Kaiyang Wu <origincode@aosc.io>
 ---
- po/zh_CN.po | 10 +++++++++-
- po/zh_TW.po | 10 +++++++++-
- 2 files changed, 18 insertions(+), 2 deletions(-)
+ po/zh_CN.po | 3 ++-
+ po/zh_TW.po | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/po/zh_CN.po b/po/zh_CN.po
-index 321e443f..2832a05d 100644
+index 62e7ad0b..a1c3db7d 100644
 --- a/po/zh_CN.po
 +++ b/po/zh_CN.po
-@@ -178,7 +178,7 @@ msgid "Delete the backup files"
- msgstr "删除备份文件"
+@@ -163,6 +163,7 @@ msgstr "缓存"
+ #: ../cleaners/flash.xml ../cleaners/teamviewer.xml
+ #: ../cleaners/internet_explorer.xml ../cleaners/gftp.xml ../cleaners/kde.xml
+ #: ../cleaners/vuze.xml ../bleachbit/Cleaner.py
++#: ../cleaners/oma.xml
+ msgid "Delete the cache"
+ msgstr "删除缓存文件"
  
- #: ../cleaners/apt.xml ../cleaners/dnf.xml ../cleaners/pacman.xml
--#: ../cleaners/snap.xml ../cleaners/yum.xml
-+#: ../cleaners/snap.xml ../cleaners/yum.xml ../cleaner/oma.yml
+@@ -186,7 +187,7 @@ msgid "Delete the most recently used list"
+ msgstr "清空“最近使用”列表"
+ 
+ #: ../cleaners/dnf.xml ../cleaners/yum.xml ../cleaners/pacman.xml
+-#: ../cleaners/apt.xml ../cleaners/snap.xml
++#: ../cleaners/apt.xml ../cleaners/snap.xml ../cleaners/oma.xml
  msgid "Package manager"
  msgstr "包管理器"
  
-@@ -686,6 +686,14 @@ msgstr "清空“最近使用”列表"
- msgid "Custom folders will be reset."
- msgstr "将重置自定义文件夹。"
- 
-+#: ../cleaners/oma.xml
-+msgid "Package cache"
-+msgstr "软件包缓存"
-+
-+#: ../cleaners/oma.xml
-+msgid "Delete system package cache"
-+msgstr "删除系统软件包缓存"
-+
- #: ../cleaners/profanity.xml
- msgid "Downloaded files"
- msgstr "已下载的文件"
 diff --git a/po/zh_TW.po b/po/zh_TW.po
-index 21afcec4..247f9baa 100644
+index 92e327fc..8d2202e6 100644
 --- a/po/zh_TW.po
 +++ b/po/zh_TW.po
-@@ -177,7 +177,7 @@ msgid "Delete the backup files"
- msgstr "刪除備份檔案"
+@@ -162,6 +162,7 @@ msgstr "快取"
+ #: ../cleaners/flash.xml ../cleaners/teamviewer.xml
+ #: ../cleaners/internet_explorer.xml ../cleaners/gftp.xml ../cleaners/kde.xml
+ #: ../cleaners/vuze.xml ../bleachbit/Cleaner.py
++#: ../cleaners/oma.xml
+ msgid "Delete the cache"
+ msgstr "刪除快取"
  
- #: ../cleaners/apt.xml ../cleaners/dnf.xml ../cleaners/pacman.xml
--#: ../cleaners/snap.xml ../cleaners/yum.xml
-+#: ../cleaners/snap.xml ../cleaners/yum.xml ../cleaners/oma.xml
+@@ -185,7 +186,7 @@ msgid "Delete the most recently used list"
+ msgstr "刪除最近使用檔案清單"
+ 
+ #: ../cleaners/dnf.xml ../cleaners/yum.xml ../cleaners/pacman.xml
+-#: ../cleaners/apt.xml ../cleaners/snap.xml
++#: ../cleaners/apt.xml ../cleaners/snap.xml ../cleaners/oma.xml
  msgid "Package manager"
  msgstr "軟體包管理員"
  
-@@ -683,6 +683,14 @@ msgstr "刪除最近使用檔案清單"
- msgid "Custom folders will be reset."
- msgstr "自訂資料夾將被重置。"
- 
-+#: ../cleaners/oma.xml
-+msgid "Package cache"
-+msgstr "軟體包快取"
-+
-+#: ../cleaners/oma.xml
-+msgid "Delete system package cache"
-+msgstr "刪除系統軟體包快取"
-+
- #: ../cleaners/profanity.xml
- msgid "Downloaded files"
- msgstr "已下載的檔案"
 -- 
-2.55.0
+2.56.0
 

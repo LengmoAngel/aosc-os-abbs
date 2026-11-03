@@ -1,0 +1,37 @@
+From 8bbdd7bbb3c429d8fc3d4c8c8b2704ac688f5ed6 Mon Sep 17 00:00:00 2001
+From: xtex <xtexchooser@duck.com>
+Date: Sun, 11 May 2025 13:54:24 +0800
+Subject: [PATCH 20/21] AOSCOS: Disable pyi generation
+
+It is currently broken on Python 3.14 b1.
+
+PySide2 is so old and should be replaced with other things.
+I have no interest in maintaining it.
+---
+ sources/pyside2/cmake/Macros/PySideModules.cmake | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/sources/pyside2/cmake/Macros/PySideModules.cmake b/sources/pyside2/cmake/Macros/PySideModules.cmake
+index 14707f9..4919612 100644
+--- a/sources/pyside2/cmake/Macros/PySideModules.cmake
++++ b/sources/pyside2/cmake/Macros/PySideModules.cmake
+@@ -204,11 +204,11 @@ macro(create_pyside_module)
+     endif()
+ 
+     # Add target to generate pyi file, which depends on the module target.
+-    add_custom_target("${module_NAME}_pyi" ALL
+-                      COMMAND ${CMAKE_COMMAND} -E env ${ld_prefix}
+-                      "${SHIBOKEN_PYTHON_INTERPRETER}"
+-                      "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
+-    add_dependencies("${module_NAME}_pyi" ${module_NAME})
++    # add_custom_target("${module_NAME}_pyi" ALL
++    #                   COMMAND ${CMAKE_COMMAND} -E env ${ld_prefix}
++    #                   "${SHIBOKEN_PYTHON_INTERPRETER}"
++    #                   "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
++    # add_dependencies("${module_NAME}_pyi" ${module_NAME})
+ 
+     # install
+     install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide2")
+-- 
+2.52.0
+

@@ -1,9 +1,9 @@
 PKGNAME=binutils+cross-loongson3
-PKGDEP="bash glibc binutils"
-BUILDDEP="flex xz elfutils zstd"
+PKGDEP="glibc zlib zstd"
+BUILDDEP="flex xz"
 PKGSEC=devel
 
 __CROSS="loongson3"
-FAIL_ARCH="${__CROSS}"
+FAIL_ARCH="@(${__CROSS}|loongson2f)"
 
 PKGDES="Binutils (cross tools for MIPS-based Loongson 3 GNU/Linux targets)"

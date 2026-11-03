@@ -22,6 +22,8 @@ elif ab_match_arch "ppc64el" ; then
     ARCH_OPTS="linux-ppc64le"
 elif ab_match_arch "riscv64" ; then
     ARCH_OPTS="linux64-riscv64"
+elif ab_match_arch "sparc64"; then
+    ARCH_OPTS="linux64-sparcv9"
 fi
 
 # Use on little endian platforms when GCC supports uint128_t.
@@ -48,6 +50,5 @@ make
 abinfo "Installing files ..."
 make MANDIR=/usr/share/man MANSUFFIX=ssl DESTDIR="$PKGDIR" install
 
-if ab_match_arch "+(i486|powerpc)"; then
-    rm -rv "$PKGDIR"/usr/share/doc/openssl/html
-fi
+abinfo "Dropping docs ..."
+rm -rv "$PKGDIR"/usr/share/doc/openssl/html

@@ -19,7 +19,6 @@ appdirs
 semantic-version
 setuptools-rust
 pyasn1
-ipaddress
 asn1crypto
 cffi
 pycparser
@@ -141,9 +140,7 @@ libxslt
 python-cssselect
 lxml
 et-xmlfile
-olefile
 breathe
-py
 iniconfig
 flit-scm
 exceptiongroup
@@ -300,9 +297,6 @@ texlive
 gdb
 cuda
 openvdb
-sphinx-press-theme
-sphinx-tabs
-testresources
 openimageio
 opencolorio
 materialx
@@ -466,7 +460,6 @@ wrapt
 deprecated
 deprecation
 ocrmypdf
-sphinx-copybutton
 sphinx-rtd-dark-mode
 texworks
 txt2tags
@@ -474,7 +467,6 @@ ixion
 liborcus
 libreoffice
 unoconv
-pypandoc
 apostrophe
 pyenchant
 python-markdown-math
@@ -554,7 +546,6 @@ pygattlib
 pybluez
 flatbuffers
 kodi
-scikit-build
 rapidfuzz
 scikit-build-core
 levenshtein
@@ -584,7 +575,6 @@ whipper
 pyiso8601
 m3u8
 ykdl
-mutf8
 dukpy
 you-get
 cymruwhois
@@ -600,7 +590,6 @@ itsdangerous
 flask
 python-kaitaistruct
 python-ldap3
-passlib
 pylsqpack
 publicsuffix2
 aioquic
@@ -644,8 +633,6 @@ swiftclient
 debtcollector
 stevedore
 oslo-i18n
-rfc3986
-oslo-config
 oslo-utils
 oslo-serialization
 openstack-service-types
@@ -785,7 +772,6 @@ pyatspi
 caribou
 python-pam
 xapps
-polib
 nemo
 python-xapp
 cinnamon
@@ -846,7 +832,6 @@ nodejs-20
 txaio
 autobahn
 beaker
-pastel
 pylev
 cppheaderparser
 ecdsa
@@ -864,18 +849,11 @@ wtforms
 fuse-python
 gmpy2
 greenlet
-hypothesis-python
 identify
 isort
-jellyfish
 jiter
-jupyter-core
-pyzmq
-jupyter-client
 lark-parser
 legacy-cgi
-lockfile
-lunarsolarconverter
 mpmath
 types-psutil
 types-setuptools
@@ -883,24 +861,15 @@ mypy-extensions
 mypy
 nanobind
 nodeenv
-ntlm-auth
 openai-python
 owslib
 userpath
 pipx
-pluginbase
 pre-commit
-pyaaf2
-pyacoustid
-speg
-pycson
 pygame-sdl2
 pygit2
 pyglet
 pygraphviz
-pyicu
-pylibacl
-pynput
 pynvim
 pyqtwebengine
 pysol-cards
@@ -909,7 +878,6 @@ python-dbusmock
 python-graphviz
 python-mpd2
 pyx
-pyxattr
 random2
 sympy
 sysv-ipc

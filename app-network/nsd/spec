@@ -1,4 +1,4 @@
-VER=4.14.3
+VER=4.15.3
 SRCS="tbl::https://www.nlnetlabs.nl/downloads/nsd/nsd-$VER.tar.gz"
-CHKSUMS="sha256::9629ad64d9c1b019bbe22296d5148d7ae65f588ce265a6424750740f052bb12b"
+CHKSUMS="sha256::6cd323354ebdf8c6a1eb5a14ecce25c69534013b70e7b0197d915cd581ab530c"
 CHKUPDATE="anitya::id=2500"

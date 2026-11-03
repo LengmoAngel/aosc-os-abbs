@@ -1,0 +1,24 @@
+VER=7.2.9
+# Note: tg_owt and tde2e are strictly version-bound to each release; upstream
+# pins its exact commits in Telegram/build/docker/centos_env/Dockerfile.
+#
+# FIXME: As of 7.2.9, the upstream's tg_owt pin (5c5c7125) uses absl::Nonnull, removed
+# in abseil-cpp >= 20260526 (our system version), and fails to build.
+# Use a newer, API-compatible tg_owt snapshot instead, which also includes
+# the fix for building with GCC 16 (desktop-app/tg_owt@9826d0e), and the
+# tde2e snapshot pinned by telegram-desktop 7.0.8.
+OWTVER=d1cf250ea73de26c4c1f0a3c8173eb2648efbb04
+TDLIBVER=022d60202e446ad1287b9fb68e687c8a0760788b
+
+SRCS="git::commit=tags/v$VER::https://github.com/AyuGram/AyuGramDesktop \
+      git::rename=tg_owt;commit=${OWTVER}::https://github.com/desktop-app/tg_owt \
+      git::rename=td;commit=${TDLIBVER}::https://github.com/tdlib/td"
+CHKSUMS="SKIP SKIP SKIP"
+CHKUPDATE="anitya::id=390672"
+
+SUBDIR="ayugram-desktop"
+ENVREQ__ARM64="total_mem_per_core=3"
+ENVREQ__LOONGARCH64="total_mem_per_core=4"
+ENVREQ__LOONGSON3="total_mem_per_core=4"
+ENVREQ__PPC64EL="total_mem_per_core=4"
+ENVREQ__RISCV64="total_mem_per_core=3"

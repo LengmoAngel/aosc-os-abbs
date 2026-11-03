@@ -5,29 +5,22 @@ PKGDEP="x11-lib libdrm expat systemd elfutils nettle \
         libva wayland lm-sensors libglvnd llvm-runtime \
         libcl libclc spirv-llvm-translator libdisplay-info \
         xcb-util-keysyms libconfig"
-PKGDEP__RETRO="x11-lib elfutils libdrm libglvnd libva llvm-runtime \
-               expat systemd"
-PKGDEP__ARMV4="${PKGDEP__RETRO}"
-PKGDEP__ARMV6HF="${PKGDEP__RETRO}"
-PKGDEP__ARMV7HF="${PKGDEP__RETRO}"
-PKGDEP__I486="${PKGDEP__RETRO}"
-PKGDEP__LOONGSON2F="${PKGDEP__RETRO}"
-PKGDEP__M68K="${PKGDEP__RETRO}"
-PKGDEP__POWERPC="${PKGDEP__RETRO}"
-PKGDEP__PPC64="${PKGDEP__RETRO}"
+# Note: LLVM not enabled.
+PKGDEP__RETRO="x11-lib elfutils libdrm libglvnd libva expat systemd"
 
-BUILDDEP="x11-proto mako systemd valgrind llvm libunwind glslang \
-          spirv-tools ply rustc rust-bindgen pycparser cbindgen pyyaml \
-          directx-headers"
+# Note: LLVM not enabled.
+BUILDDEP="x11-proto mako systemd valgrind llvm libunwind glslang spirv-tools \
+          ply rustc rust-bindgen pycparser cbindgen pyyaml directx-headers"
 # FIXME: Valgrind is not yet available.
 BUILDDEP__LOONGARCH64="${BUILDDEP/valgrind/}"
 BUILDDEP__LOONGARCH64_NOSIMD="${BUILDDEP__LOONGARCH64}"
 BUILDDEP__RISCV64="${BUILDDEP/valgrind/}"
 
-BUILDDEP__RETRO="x11-proto llvm mako glslang"
-BUILDDEP__IA64="x11-proto mako"
-
-PKGEPOCH=1
+BUILDDEP__RETRO="x11-proto llvm mako glslang setuptools-python3"
+# FIXME: Some architectures have no LLVM support.
+BUILDDEP__RETRO_NOLLVM="x11-proto mako"
+BUILDDEP__ALPHA="${BUILDDEP__RETRO_NOLLVM}"
+BUILDDEP__IA64="${BUILDDEP__RETRO_NOLLVM}"
 
 # Note: -Dwrap_mode=default is used for Crate dependencies.
 MESON_AFTER=(
@@ -150,7 +143,7 @@ MESON_AFTER__RETRO=(
     '-Dplatforms=x11'
     '-Degl-native-platform=auto'
     '-Ddri-drivers-path=/usr/lib/xorg/modules/dri'
-    '-Dgallium-extra-hud=true'
+    '-Dgallium-extra-hud=false'
     '-Dgallium-va=enabled'
     '-Dshader-cache=enabled'
     '-Dshader-cache-default=true'
@@ -194,14 +187,28 @@ MESON_AFTER__RETRO_OTHER=(
     '-Dvulkan-drivers='
 )
 
+MESON_AFTER__ALPHA=(
+    "${MESON_AFTER__RETRO_OTHER[@]}"
+    # FIXME: Vulkan requires LLVM.
+    '-Dvulkan-layers='
+)
 MESON_AFTER__ARMV4=(
     "${MESON_AFTER__RETRO_ARM[@]}"
+    # Note: None of the usable ARM devices actually come with a GPU.
+    '-Dgallium-drivers='
+    '-Dgallium-va=disabled'
+    '-Degl=disabled'
 )
 MESON_AFTER__ARMV6HF=(
     "${MESON_AFTER__RETRO_ARM[@]}"
 )
 MESON_AFTER__ARMV7HF=(
     "${MESON_AFTER__RETRO_ARM[@]}"
+)
+MESON_AFTER__IA64=(
+    "${MESON_AFTER__RETRO_OTHER[@]}"
+    # FIXME: Vulkan requires LLVM.
+    '-Dvulkan-layers='
 )
 MESON_AFTER__LOONGSON2F=(
     "${MESON_AFTER__RETRO_OTHER[@]}"

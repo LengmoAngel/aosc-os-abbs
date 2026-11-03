@@ -1,0 +1,26 @@
+From b916d26b52a9110ae429443e1b30ec0bf1d4f1eb Mon Sep 17 00:00:00 2001
+From: xtex <xtexchooser@duck.com>
+Date: Sun, 11 May 2025 09:03:56 +0800
+Subject: [PATCH 04/21] DEBIAN: Fix spelling errors
+
+Author: Sophie Brun <sophie@freexian.com>
+---
+ sources/pyside2/libpyside/pysideproperty.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sources/pyside2/libpyside/pysideproperty.cpp b/sources/pyside2/libpyside/pysideproperty.cpp
+index 0d0957f..86909d3 100644
+--- a/sources/pyside2/libpyside/pysideproperty.cpp
++++ b/sources/pyside2/libpyside/pysideproperty.cpp
+@@ -519,7 +519,7 @@ int setValue(PySideProperty *self, PyObject *source, PyObject *value)
+         Shiboken::AutoDecRef result(PyObject_CallObject(fdel, args));
+         return (result.isNull() ? -1 : 0);
+     }
+-    PyErr_SetString(PyExc_AttributeError, "Attibute read only");
++    PyErr_SetString(PyExc_AttributeError, "Attribute read only");
+     return -1;
+ }
+ 
+-- 
+2.52.0
+

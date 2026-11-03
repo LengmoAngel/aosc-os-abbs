@@ -1,0 +1,38 @@
+From 6d4178e6ee86a13d2e972e8f8d9dca4e252c5db0 Mon Sep 17 00:00:00 2001
+From: CAB233 <yidaduizuoye@outlook.com>
+Date: Tue, 22 Sep 2026 18:47:06 +0800
+Subject: [PATCH 3/4] AOSCOS: use local patched libuv-sys-lite
+
+---
+ Cargo.lock | 4 +---
+ Cargo.toml | 1 +
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index 79deba81a8..d38a13455b 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -6666,10 +6666,8 @@ dependencies = [
+ [[package]]
+ name = "libuv-sys-lite"
+ version = "1.48.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ef43df715b26b66832106cde0adc4c156bc91f46fc35164ab257281f62657956"
+ dependencies = [
+- "bindgen 0.70.1",
++ "bindgen 0.72.1",
+  "libloading 0.8.5",
+ ]
+ 
+diff --git a/Cargo.toml b/Cargo.toml
+index aa335d0226..d41f9e6e25 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -640,3 +640,4 @@ opt-level = 3
+ 
+ [patch.crates-io]
+ v8 = { path = "../rusty_v8" }
++libuv-sys-lite = { path = "../libuv-sys-lite/crate" }
+-- 
+2.56.0
+

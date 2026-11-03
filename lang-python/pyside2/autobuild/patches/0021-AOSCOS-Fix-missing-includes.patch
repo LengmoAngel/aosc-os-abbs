@@ -1,0 +1,55 @@
+From ff4762d60ec8f8f6675bc448da7b9844536e11d9 Mon Sep 17 00:00:00 2001
+From: xtex <xtexchooser@duck.com>
+Date: Fri, 16 May 2025 22:33:07 +0800
+Subject: [PATCH 21/21] AOSCOS: Fix missing includes
+
+---
+ sources/pyside2/PySide2/Qt3DCore/typesystem_3dcore.xml | 3 +++
+ sources/pyside2/libpyside/pyside.h                     | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/sources/pyside2/PySide2/Qt3DCore/typesystem_3dcore.xml b/sources/pyside2/PySide2/Qt3DCore/typesystem_3dcore.xml
+index 8696a12..65862d4 100644
+--- a/sources/pyside2/PySide2/Qt3DCore/typesystem_3dcore.xml
++++ b/sources/pyside2/PySide2/Qt3DCore/typesystem_3dcore.xml
+@@ -43,6 +43,7 @@
+ <typesystem package="PySide2.Qt3DCore">
+     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+     <namespace-type name="Qt3DCore" generate-using="no">
++      <include file-name="Qt3DCore/QNodeCommand" location="global" />
+         <enum-type name="ChangeFlag" flags="ChangeFlags"/>
+         <object-type name="QAbstractAspect"/>
+         <object-type name="QAbstractSkeleton" since="5.10"/>
+@@ -58,6 +59,7 @@
+         <object-type name="QAspectJob"/>
+         <object-type name="QBackendNode">
+             <enum-type name="Mode"/>
++            <include file-name="Qt3DCore/QNodeCommand" location="global" />
+         </object-type>
+         <!-- TODO: Solve issues related to windows and a unresolved
+             external symbol
+@@ -82,6 +84,7 @@
+         </object-type>
+         <object-type name="QNode">
+             <enum-type name="PropertyTrackingMode"/>
++            <include file-name="Qt3DCore/QNodeCommand" location="global" />
+         </object-type>
+         <object-type name="QNodeCommand" since="5.10"/>
+         <object-type name="QNodeCreatedChangeBase"/>
+diff --git a/sources/pyside2/libpyside/pyside.h b/sources/pyside2/libpyside/pyside.h
+index c72f37a..4a86dab 100644
+--- a/sources/pyside2/libpyside/pyside.h
++++ b/sources/pyside2/libpyside/pyside.h
+@@ -51,6 +51,9 @@
+ #include <QtCore/QMetaType>
+ #include <QtCore/QHash>
+ 
++#include <Qt3DCore/QNodeCommand>
++using Qt3DCore::QNodeCommand;
++
+ struct SbkObjectType;
+ 
+ namespace PySide
+-- 
+2.52.0
+

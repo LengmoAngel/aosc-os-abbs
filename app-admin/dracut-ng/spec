@@ -1,4 +1,4 @@
-VER=110
+VER=112
 REL=1
 SRCS="git::commit=tags/$VER::https://github.com/dracut-ng/dracut-ng"
 CHKSUMS="SKIP"

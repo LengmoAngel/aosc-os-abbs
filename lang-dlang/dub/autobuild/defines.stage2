@@ -5,3 +5,5 @@ PKGDES="Package and build management system for D"
 
 USECLANG=0
 ABSPLITDBG=0
+
+FAIL_ARCH="!(amd64|arm64|loongarch64)"

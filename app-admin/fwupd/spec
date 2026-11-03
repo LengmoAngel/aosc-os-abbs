@@ -1,4 +1,4 @@
-VER=2.1.7
+VER=2.1.9
 SRCS="tbl::https://github.com/fwupd/fwupd/releases/download/${VER//+/-}/fwupd-${VER%%+*}.tar.xz"
-CHKSUMS="sha256::472e9426f7a1b18fa9d199666c15482d4ee51ea35e916ca53bb3ca25919edb10"
+CHKSUMS="sha256::d45f3cbac06f1f6da300fb7c148237ff15c12df9981824e925bc2f3722bff233"
 CHKUPDATE="anitya::id=5833"

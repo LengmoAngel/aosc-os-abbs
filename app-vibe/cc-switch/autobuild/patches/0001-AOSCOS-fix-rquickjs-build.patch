@@ -1,0 +1,82 @@
+From bacb852a135c608b721ec6ffc6b2288a3cb50e28 Mon Sep 17 00:00:00 2001
+From: Suyun <suyun@aosc.io>
+Date: Tue, 15 Sep 2026 15:17:35 +0800
+Subject: [PATCH 1/2] AOSCOS: fix rquickjs build
+
+- Use patched rquickjs to fix build on riscv64.
+- Enable bindgen feature. rquickjs does not ship bindings on for ppc64el,
+loongson3 and riscv64. So bindgen is needed to generate bindings.
+---
+ src-tauri/Cargo.lock | 12 ++++--------
+ src-tauri/Cargo.toml |  4 ++--
+ 2 files changed, 6 insertions(+), 10 deletions(-)
+
+diff --git a/src-tauri/Cargo.lock b/src-tauri/Cargo.lock
+index c6c65449..871c44d5 100644
+--- a/src-tauri/Cargo.lock
++++ b/src-tauri/Cargo.lock
+@@ -4574,8 +4574,7 @@ dependencies = [
+ [[package]]
+ name = "rquickjs"
+ version = "0.8.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d16661bff09e9ed8e01094a188b463de45ec0693ade55b92ed54027d7ba7c40c"
++source = "git+https://github.com/AOSC-Tracking/rquickjs.git?branch=aosc%2Fv0.8.1#1036049b5590bc6c9d098434b21fd5f1112f3080"
+ dependencies = [
+  "rquickjs-core",
+  "rquickjs-macro",
+@@ -4584,8 +4583,7 @@ dependencies = [
+ [[package]]
+ name = "rquickjs-core"
+ version = "0.8.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6c8db6379e204ef84c0811e90e7cc3e3e4d7688701db68a00d14a6db6849087b"
++source = "git+https://github.com/AOSC-Tracking/rquickjs.git?branch=aosc%2Fv0.8.1#1036049b5590bc6c9d098434b21fd5f1112f3080"
+ dependencies = [
+  "relative-path",
+  "rquickjs-sys",
+@@ -4594,8 +4592,7 @@ dependencies = [
+ [[package]]
+ name = "rquickjs-macro"
+ version = "0.8.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6041104330c019fcd936026ae05e2446f5e8a2abef329d924f25424b7052a2f3"
++source = "git+https://github.com/AOSC-Tracking/rquickjs.git?branch=aosc%2Fv0.8.1#1036049b5590bc6c9d098434b21fd5f1112f3080"
+ dependencies = [
+  "convert_case 0.6.0",
+  "fnv",
+@@ -4611,8 +4608,7 @@ dependencies = [
+ [[package]]
+ name = "rquickjs-sys"
+ version = "0.8.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4bc352c6b663604c3c186c000cfcc6c271f4b50bc135a285dd6d4f2a42f9790a"
++source = "git+https://github.com/AOSC-Tracking/rquickjs.git?branch=aosc%2Fv0.8.1#1036049b5590bc6c9d098434b21fd5f1112f3080"
+ dependencies = [
+  "bindgen",
+  "cc",
+diff --git a/src-tauri/Cargo.toml b/src-tauri/Cargo.toml
+index d596fd27..84e1b130 100644
+--- a/src-tauri/Cargo.toml
++++ b/src-tauri/Cargo.toml
+@@ -63,7 +63,7 @@ rustls = "0.23"
+ webpki-roots = "0.26"
+ rustls-native-certs = "0.8"
+ regex = "1.10"
+-rquickjs = { version = "0.8", features = ["array-buffer", "classes"] }
++rquickjs = { git = "https://github.com/AOSC-Tracking/rquickjs.git", branch = "aosc/v0.8.1", features = ["array-buffer", "classes", "bindgen"] }
+ thiserror = "2.0"
+ anyhow = "1.0"
+ zip = "2.2"
+@@ -106,7 +106,7 @@ windows-sys = { version = "0.61", features = [
+ ] }
+ 
+ [target.'cfg(all(target_os = "windows", target_arch = "aarch64"))'.dependencies]
+-rquickjs = { version = "0.8", features = ["bindgen"] }
++rquickjs = { git = "https://github.com/AOSC-Tracking/rquickjs.git", branch = "aosc/v0.8.1", features = ["bindgen"] }
+ 
+ [target.'cfg(target_os = "macos")'.dependencies]
+ objc2 = "0.5"
+-- 
+2.55.0
+

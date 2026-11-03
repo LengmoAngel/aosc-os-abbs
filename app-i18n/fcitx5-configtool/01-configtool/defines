@@ -1,15 +1,13 @@
-PKGNAME="fcitx5-configtool"
+PKGNAME=fcitx5-configtool
 PKGSEC=x11
-PKGDEP="fcitx5 fcitx5-qt gcc-runtime glibc kdbusaddons kitemviews \
-        kwidgetsaddons kwindowsystem qt-5 x11-lib"
-BUILDDEP="extra-cmake-modules kdeclarative kirigami2 ninja plasma-framework \
-          python-3"
+PKGDEP="fcitx5 fcitx5-qt iso-codes kcmutils kcoreaddons kdbusaddons \
+        ki18n kiconthemes kirigami kitemviews ksvg kwidgetsaddons \
+        kwindowsystem libplasma libxkbcommon qt-6 x11-lib xkeyboard-config"
+BUILDDEP="extra-cmake-modules kdeclarative kpackage"
 PKGDES="Configuration tool for Fcitx 5"
+
+ABTYPE=cmakeninja
 
 PKGPROV="fcitx5-config-qt kcm-fcitx5"
 PKGREP="kcm-fcitx5"
 PKGBREAK="kcm-fcitx5<=20200615"
-
-PKGEPOCH=1
-
-CMAKE_AFTER="-DUSE_QT6=OFF"

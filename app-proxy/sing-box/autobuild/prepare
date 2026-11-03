@@ -9,16 +9,6 @@ else
     _TAGS=$(cat "$SRCDIR"/release/DEFAULT_BUILD_TAGS_OTHERS)
 fi
 
-# Note: For `with_naive_outbound`, the prebuilt cronet-go static library 
-# is non-PIC for some architectures.
-#
-# Ref: https://github.com/SagerNet/cronet-go/blob/33e95201970b8e3a35cada9a43c010acd811bece/cmd/build-naive/cmd_env.go#L105
-if ab_match_arch armv6hf || ab_match_arch armv7hf || \
-   ab_match_arch loongson3 || ab_match_arch loongarch64 || \
-   ab_match_arch loongarch64_nosimd; then
-    _CGO_LDFLAGS="${_CGO_LDFLAGS} -Wl,-no-pie"
-fi
-
 CGO_LDFLAGS="${LDFLAGS} ${_CGO_LDFLAGS}"
 GO_BUILD_AFTER=(-tags "${_TAGS}")
 GO_LDFLAGS=(

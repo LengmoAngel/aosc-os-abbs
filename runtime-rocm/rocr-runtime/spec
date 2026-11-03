@@ -1,5 +1,6 @@
-VER=7.14
+VER=10.1
 SRCS="git::commit=tags/therock-${VER};rename=rocm-systems;copy-repo=true::https://github.com/ROCm/rocm-systems"
 CHKSUMS="SKIP"
 SUBDIR="rocm-systems/projects/rocr-runtime"
 CHKUPDATE="anitya::id=386527"
+REL=1

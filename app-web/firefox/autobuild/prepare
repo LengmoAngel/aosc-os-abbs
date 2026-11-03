@@ -10,12 +10,14 @@ ac_add_options --with-google-safebrowsing-api-keyfile="$SRCDIR/autobuild/google-
 
 EOF
 
+if ab_match_archgroup mainline_tier1; then
+    abinfo "Enabling PGO for primary architectures (amd64, arm64, loongarch64) ..."
+    echo "ac_add_options MOZ_PGO=1" \
+        >> "$SRCDIR"/autobuild/mozconfig
+fi
+
 if ! ab_match_arch loongson3; then
-    if ab_match_arch riscv64; then
-        # ld.lld: error: unable to find library -lgcc_s
-        echo "ac_add_options --enable-linker=bfd" \
-            >> "$SRCDIR"/autobuild/mozconfig
-    elif ab_match_arch loongarch64; then
+    if ab_match_arch loongarch64; then
         # FIXME: ld.lld: error: ../../../build/pure_virtual/libpure_virtual.a(pure_virtual.o):(function __cxa_pure_virtual: .text.unlikely.__cxa_pure_virtual+0x10): relocation R_LARCH_B26 out of range: 134949872 is not in [-134217728, 134217727]; references 'abort'
         # This workaround is required for LLVM<21 and GCC<16.
         # Link: https://github.com/loongson-community/discussions/issues/43
@@ -23,13 +25,26 @@ if ! ab_match_arch loongson3; then
             >> "$SRCDIR"/autobuild/mozconfig
         echo "export CXXFLAGS='-mcmodel=medium'" \
             >> "$SRCDIR"/autobuild/mozconfig
-    else
-        echo "ac_add_options --enable-linker=lld" \
-            >> "$SRCDIR"/autobuild/mozconfig
     fi
+    echo "ac_add_options --enable-linker=lld" \
+        >> "$SRCDIR"/autobuild/mozconfig
     echo "ac_add_options --with-wasi-sysroot=/usr/lib/wasm32-wasi/" \
         >> "$SRCDIR"/autobuild/mozconfig
     echo "ac_add_options --enable-jemalloc" \
+        >> "$SRCDIR"/autobuild/mozconfig
+fi
+
+if ab_match_arch loongson3; then
+    abinfo "Disabling LTO for loongson3 ..."
+    echo "ac_add_options --disable-lto" \
+        >> "$SRCDIR"/autobuild/mozconfig
+elif ab_match_arch riscv64; then
+    abinfo "Disabling LTO for riscv64 ..."
+    echo "ac_add_options --disable-lto" \
+        >> "$SRCDIR"/autobuild/mozconfig
+else
+    abinfo "Enabling LTO ..."
+    echo "ac_add_options --enable-lto" \
         >> "$SRCDIR"/autobuild/mozconfig
 fi
 
@@ -75,12 +90,6 @@ fi
 
 abinfo "Installing API keys..."
 cp -v "$SRCDIR"/autobuild/google-api-key "$SRCDIR"/
-
-if [[ "${CROSS:-$ARCH}" = "armv7hf" ]]; then
-    abinfo "Applying flag fixes for ARMv7 ..."
-    export CFLAGS="${CFLAGS/-march=armv7-a -mtune=cortex-a7 -mfloat-abi=hard -mfpu=neon/}"
-    export CXXFLAGS="${CXXFLAGS/-march=armv7-a -mtune=cortex-a7 -mfloat-abi=hard -mfpu=neon/}"
-fi
 
 abinfo 'Making sure $SHELL is set ...'
 export SHELL=/bin/bash

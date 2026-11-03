@@ -1,4 +1,4 @@
-VER=3.32.2
-SRCS="pypi::ver=$VER::filelock"
-CHKSUMS="sha256::c33351e1f49cae33414acbc6d56784e6ecee82514ec90795da1161fc4836b5b8"
+VER=3.32.4
+SRCS="pypi::version=$VER::filelock"
+CHKSUMS="sha256::2bde2e4cf732e0153406d8a7bc80620ecf5e621fe0d25e41143c4e3b4733ff30"
 CHKUPDATE="anitya::id=11739"

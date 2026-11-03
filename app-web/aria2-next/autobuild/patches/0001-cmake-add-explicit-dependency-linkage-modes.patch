@@ -1,0 +1,286 @@
+From 022aefb2bf1b7b4ea03c765b3cc9f3658a3246f8 Mon Sep 17 00:00:00 2001
+From: miwu04 <me@alanlin.icu>
+Date: Mon, 28 Sep 2026 18:54:15 +0800
+Subject: [PATCH] cmake: add explicit dependency linkage modes
+
+---
+ cmake/modules/Dependencies.cmake       | 10 +++
+ cmake/modules/Options.cmake            |  9 ++-
+ cmake/modules/SystemDependencies.cmake | 97 ++++++++++++++++++++++++++
+ cmake/modules/Targets.cmake            | 40 ++++++++---
+ cmake/superbuild/Media.cmake           | 18 ++++-
+ 5 files changed, 159 insertions(+), 15 deletions(-)
+ create mode 100644 cmake/modules/SystemDependencies.cmake
+
+diff --git a/cmake/modules/Dependencies.cmake b/cmake/modules/Dependencies.cmake
+index 4965166c1..a14e94603 100644
+--- a/cmake/modules/Dependencies.cmake
++++ b/cmake/modules/Dependencies.cmake
+@@ -1,3 +1,5 @@
++if(ARIA2_DEPENDENCY_ROOT)
++
+ function(aria2_import_dependency target header)
+   set(options)
+   set(one_value_args)
+@@ -57,6 +59,7 @@ find_package(OpenSSL ${ARIA2_MIN_OPENSSL_VERSION} CONFIG REQUIRED
+   NO_DEFAULT_PATH
+   NO_CMAKE_FIND_ROOT_PATH)
+ 
++
+ unset(LibtorrentRasterbar_DIR CACHE)
+ unset(Boost_DIR CACHE)
+ unset(Boost_INCLUDE_DIR CACHE)
+@@ -69,6 +72,9 @@ find_package(LibtorrentRasterbar ${ARIA2_MIN_LIBTORRENT_VERSION}
+   PATHS "${ARIA2_DEPENDENCY_ROOT}/lib/cmake/LibtorrentRasterbar"
+   NO_DEFAULT_PATH
+   NO_CMAKE_FIND_ROOT_PATH)
++  set(ARIA2_LIBTORRENT_INCLUDE_DIR "${ARIA2_DEPENDENCY_ROOT}/include")
++
++
+ 
+ unset(CURL_DIR CACHE)
+ set(CURL_DIR "${ARIA2_DEPENDENCY_ROOT}/lib/cmake/CURL")
+@@ -108,3 +114,7 @@ if(WIN32)
+     SPDLOG_UTF8_TO_WCHAR_CONSOLE
+     SPDLOG_WCHAR_FILENAMES)
+ endif()
++
++else()
++  include(${CMAKE_CURRENT_LIST_DIR}/SystemDependencies.cmake)
++endif()
+diff --git a/cmake/modules/Options.cmake b/cmake/modules/Options.cmake
+index 2eb0f1b44..bcd96f416 100644
+--- a/cmake/modules/Options.cmake
++++ b/cmake/modules/Options.cmake
+@@ -21,9 +21,14 @@ set(ARIA2_BASH_COMPLETION_DIR "" CACHE PATH "Bash completion installation direct
+ set(ARIA2_DEPENDENCY_ROOT "" CACHE PATH "Vendored dependency installation")
+ set(ARIA2_BOOST_ROOT "" CACHE PATH "Vendored Boost source root")
+ 
+-if(NOT IS_DIRECTORY "${ARIA2_DEPENDENCY_ROOT}")
++if((ARIA2_DEPENDENCY_ROOT AND NOT ARIA2_BOOST_ROOT) OR
++    (ARIA2_BOOST_ROOT AND NOT ARIA2_DEPENDENCY_ROOT))
++  message(FATAL_ERROR
++    "ARIA2_DEPENDENCY_ROOT and ARIA2_BOOST_ROOT must be provided together")
++endif()
++if(ARIA2_DEPENDENCY_ROOT AND NOT IS_DIRECTORY "${ARIA2_DEPENDENCY_ROOT}")
+   message(FATAL_ERROR "ARIA2_DEPENDENCY_ROOT must reference the vendored dependency installation")
+ endif()
+-if(NOT IS_DIRECTORY "${ARIA2_BOOST_ROOT}/boost/asio")
++if(ARIA2_BOOST_ROOT AND NOT IS_DIRECTORY "${ARIA2_BOOST_ROOT}/boost/asio")
+   message(FATAL_ERROR "ARIA2_BOOST_ROOT must reference the vendored Boost source root")
+ endif()
+diff --git a/cmake/modules/SystemDependencies.cmake b/cmake/modules/SystemDependencies.cmake
+new file mode 100644
+index 000000000..a9fa0dc8e
+--- /dev/null
++++ b/cmake/modules/SystemDependencies.cmake
+@@ -0,0 +1,97 @@
++find_package(Threads REQUIRED)
++find_package(Boost REQUIRED)
++find_package(ZLIB REQUIRED)
++find_package(EXPAT REQUIRED)
++find_package(SQLite3 REQUIRED)
++find_package(OpenSSL ${ARIA2_MIN_OPENSSL_VERSION} REQUIRED
++  COMPONENTS Crypto SSL)
++find_package(CURL REQUIRED)
++find_package(spdlog REQUIRED)
++
++if(NOT TARGET ZLIB::ZLIB)
++  message(FATAL_ERROR "System zlib package must provide the ZLIB::ZLIB target")
++endif()
++if(NOT TARGET EXPAT::EXPAT)
++  message(FATAL_ERROR "System Expat package must provide the EXPAT::EXPAT target")
++endif()
++if(TARGET SQLite3::SQLite3)
++  set(ARIA2_SYSTEM_SQLITE_TARGET SQLite3::SQLite3)
++elseif(TARGET SQLite::SQLite3)
++  set(ARIA2_SYSTEM_SQLITE_TARGET SQLite::SQLite3)
++else()
++  message(FATAL_ERROR "System SQLite3 package must provide a SQLite3 target")
++endif()
++if(NOT TARGET CURL::libcurl)
++  message(FATAL_ERROR "System curl package must provide the CURL::libcurl target")
++endif()
++if(NOT TARGET spdlog::spdlog_header_only)
++  message(FATAL_ERROR "System spdlog package must provide the spdlog::spdlog_header_only target")
++endif()
++
++add_library(aria2::zlib ALIAS ZLIB::ZLIB)
++add_library(aria2::expat ALIAS EXPAT::EXPAT)
++add_library(aria2::sqlite ALIAS ${ARIA2_SYSTEM_SQLITE_TARGET})
++set(ARIA2_BOOST_ROOT "${Boost_INCLUDE_DIRS}")
++set(ARIA2_LIBTORRENT_INCLUDE_DIR
++  "${CMAKE_SOURCE_DIR}/third_party/libtorrent/include")
++set(ARIA2_SYSTEM_DEPENDENCIES ON)
++set(ARIA2_DEPENDENCY_LINKAGE SHARED)
++
++# Keep the media stack project-owned: GPAC is not consistently packaged with
++# development files, and the engine relies on the patched vendored sources.
++include(ExternalProject)
++include(ProcessorCount)
++find_program(ARIA2_MAKE_EXECUTABLE make REQUIRED)
++find_program(ARIA2_POSIX_SHELL NAMES bash sh REQUIRED)
++ProcessorCount(ARIA2_BUILD_JOBS)
++if(NOT ARIA2_BUILD_JOBS)
++  set(ARIA2_BUILD_JOBS 2)
++endif()
++set(ARIA2_VENDOR_ROOT "${CMAKE_SOURCE_DIR}/third_party")
++set(ARIA2_DEPENDENCY_PREFIX "${CMAKE_BINARY_DIR}/vendored-media")
++file(MAKE_DIRECTORY "${ARIA2_DEPENDENCY_PREFIX}/include")
++include(${CMAKE_SOURCE_DIR}/cmake/superbuild/Media.cmake)
++
++foreach(component gpac avformat avcodec swresample avutil)
++  if(component STREQUAL "gpac")
++    set(library_name gpac_static)
++  else()
++    set(library_name "${component}")
++  endif()
++  add_library(aria2::${component} STATIC IMPORTED GLOBAL)
++  set_target_properties(aria2::${component} PROPERTIES
++    IMPORTED_LOCATION "${ARIA2_DEPENDENCY_PREFIX}/lib/lib${library_name}.a"
++    INTERFACE_INCLUDE_DIRECTORIES "${ARIA2_DEPENDENCY_PREFIX}/include")
++endforeach()
++set_property(TARGET aria2::gpac PROPERTY INTERFACE_COMPILE_DEFINITIONS
++  GPAC_ALLOW_UNSAFE_STRFUNC)
++foreach(component avformat avcodec swresample avutil)
++  set_property(TARGET aria2::${component} PROPERTY INTERFACE_COMPILE_DEFINITIONS
++    "$<$<COMPILE_LANGUAGE:CXX>:__STDC_CONSTANT_MACROS>")
++endforeach()
++
++
++
++# Use the patched vendored libtorrent while common dependencies remain system-provided.
++set(_aria2_saved_build_shared_libs "${BUILD_SHARED_LIBS}")
++set(BUILD_SHARED_LIBS OFF)
++set(build_tests OFF)
++set(build_examples OFF)
++set(build_tools OFF)
++set(python-bindings OFF)
++set(deprecated-functions OFF)
++set(extensions ON)
++set(mutable-torrents ON)
++set(streaming ON)
++set(i2p OFF)
++set(webtorrent OFF)
++set(logging ON)
++set(encryption ON)
++set(dht ON)
++add_subdirectory(
++  "${CMAKE_SOURCE_DIR}/third_party/libtorrent"
++  "${CMAKE_BINARY_DIR}/third_party/libtorrent"
++  EXCLUDE_FROM_ALL)
++add_library(LibtorrentRasterbar::torrent-rasterbar ALIAS torrent-rasterbar)
++set(BUILD_SHARED_LIBS "${_aria2_saved_build_shared_libs}")
++
+diff --git a/cmake/modules/Targets.cmake b/cmake/modules/Targets.cmake
+index afe0b42d9..47624938d 100644
+--- a/cmake/modules/Targets.cmake
++++ b/cmake/modules/Targets.cmake
+@@ -4,6 +4,9 @@ file(GLOB_RECURSE ARIA2_SOURCES CONFIGURE_DEPENDS
+ list(REMOVE_ITEM ARIA2_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/app/Main.cc")
+ 
+ add_library(aria2_core STATIC ${ARIA2_SOURCES})
++if(ARIA2_SYSTEM_DEPENDENCIES)
++  add_dependencies(aria2_core ffmpeg_project gpac_project)
++endif()
+ target_include_directories(aria2_core PUBLIC
+   "${CMAKE_CURRENT_SOURCE_DIR}/src"
+   "${ARIA2_BOOST_ROOT}")
+@@ -13,17 +16,32 @@ target_compile_definitions(aria2_core PUBLIC
+   BOOST_ERROR_CODE_HEADER_ONLY
+   BOOST_JSON_NO_LIB
+   XML_STATIC)
+-target_link_libraries(aria2_core PUBLIC
+-  spdlog::spdlog_header_only
+-  CURL::libcurl_static
+-  aria2::sqlite
+-  OpenSSL::SSL
+-  OpenSSL::Crypto
+-  aria2::gpac aria2::avformat aria2::avcodec aria2::swresample aria2::avutil
+-  aria2::expat
+-  aria2::zlib
+-  LibtorrentRasterbar::torrent-rasterbar
+-  Threads::Threads)
++if(ARIA2_SYSTEM_DEPENDENCIES)
++  target_link_libraries(aria2_core PUBLIC
++    spdlog::spdlog_header_only
++    CURL::libcurl
++    aria2::sqlite
++    OpenSSL::SSL
++    OpenSSL::Crypto
++    aria2::gpac aria2::avformat aria2::avcodec aria2::swresample aria2::avutil
++    aria2::expat
++    aria2::zlib
++    LibtorrentRasterbar::torrent-rasterbar
++    Threads::Threads)
++else()
++  target_link_libraries(aria2_core PUBLIC
++    spdlog::spdlog_header_only
++    CURL::libcurl_static
++    aria2::sqlite
++    OpenSSL::SSL
++    OpenSSL::Crypto
++    aria2::gpac aria2::avformat aria2::avcodec aria2::swresample aria2::avutil
++    aria2::expat
++    aria2::zlib
++    LibtorrentRasterbar::torrent-rasterbar
++    Threads::Threads)
++endif()
++
+ if(WIN32)
+   # Asio lock layouts must agree across the core, dependencies and consumers.
+   target_compile_definitions(aria2_core PUBLIC
+diff --git a/cmake/superbuild/Media.cmake b/cmake/superbuild/Media.cmake
+index 597ddaf54..e8f9fb7d6 100644
+--- a/cmake/superbuild/Media.cmake
++++ b/cmake/superbuild/Media.cmake
+@@ -65,6 +65,11 @@ endif()
+ ExternalProject_Add(ffmpeg_project
+   SOURCE_DIR "${ARIA2_VENDOR_ROOT}/ffmpeg"
+   BINARY_DIR "${CMAKE_BINARY_DIR}/vendor/ffmpeg"
++  BUILD_BYPRODUCTS
++    "${ARIA2_DEPENDENCY_PREFIX}/lib/libavformat.a"
++    "${ARIA2_DEPENDENCY_PREFIX}/lib/libavcodec.a"
++    "${ARIA2_DEPENDENCY_PREFIX}/lib/libswresample.a"
++    "${ARIA2_DEPENDENCY_PREFIX}/lib/libavutil.a"
+   CONFIGURE_COMMAND ${media_environment} ${ARIA2_POSIX_SHELL} <SOURCE_DIR>/configure
+     ${ffmpeg_tool_args} --prefix=${ARIA2_DEPENDENCY_PREFIX}
+     "--extra-cflags=${media_cflags}" "--extra-ldflags=${media_ldflags}"
+@@ -88,15 +93,24 @@ set(gpac_packages ssl opensvc openhevc platinum freetype jpeg openjpeg png mad a
+   xvid faad ffmpeg freenect vorbis theora nghttp2 ngtcp2 nghttp3 oss dvb4linux
+   alsa pulseaudio jack directfb hid lzma tinygl vtb ogg sdl caption mpeghdec
+   libcaca curl)
++if(ARIA2_SYSTEM_DEPENDENCIES)
++  set(gpac_dependencies)
++  set(gpac_zlib_arg --use-zlib=system)
++else()
++  set(gpac_dependencies zlib_project)
++  set(gpac_zlib_arg --use-zlib=${ARIA2_DEPENDENCY_PREFIX})
++endif()
+ set(gpac_package_args)
+ foreach(package IN LISTS gpac_packages)
+   list(APPEND gpac_package_args --disable-${package})
+ endforeach()
+ ExternalProject_Add(gpac_project
+-  DEPENDS zlib_project
++  DEPENDS ${gpac_dependencies}
+   BUILD_ALWAYS TRUE
+   SOURCE_DIR "${ARIA2_VENDOR_ROOT}/gpac"
+   BINARY_DIR "${CMAKE_BINARY_DIR}/vendor/gpac"
++  BUILD_BYPRODUCTS
++    "${ARIA2_DEPENDENCY_PREFIX}/lib/libgpac_static.a"
+   CONFIGURE_COMMAND ${media_environment} ${ARIA2_POSIX_SHELL} <SOURCE_DIR>/configure
+     --prefix=${ARIA2_DEPENDENCY_PREFIX}
+     ${media_tool_args} "--extra-cflags=${media_cflags}" "--extra-ldflags=${media_ldflags}"
+@@ -104,7 +118,7 @@ ExternalProject_Add(gpac_project
+     --enable-dashin --enable-parsers --enable-vtt --enable-ttxt --enable-import --enable-txtin
+     --enable-isoff --enable-isoff-write --enable-isoff-frag
+     --enable-threads --enable-network --enable-net-cap --enable-log
+-    --use-zlib=${ARIA2_DEPENDENCY_PREFIX}
++    ${gpac_zlib_arg}
+     ${gpac_package_args}
+   BUILD_COMMAND ${media_environment} ${ARIA2_MAKE_EXECUTABLE} -C src -j${ARIA2_BUILD_JOBS} lib
+   INSTALL_COMMAND ${CMAKE_COMMAND}
+-- 
+2.56.0
+

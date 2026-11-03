@@ -1,4 +1,4 @@
-From 75f314efbaefe4b13acd1a4b5b17cb8afd1eda0f Mon Sep 17 00:00:00 2001
+From 995646d6241ab92ff7e567477a3599203a836890 Mon Sep 17 00:00:00 2001
 From: SkyBird233 <52884766+SkyBird233@users.noreply.github.com>
 Date: Tue, 21 Apr 2026 18:42:44 +0800
 Subject: [PATCH 5/5] bitwarden: replace rust-lang/libc with patched version
@@ -9,16 +9,16 @@ Subject: [PATCH 5/5] bitwarden: replace rust-lang/libc with patched version
  1 file changed, 3 insertions(+)
 
 diff --git a/apps/desktop/desktop_native/Cargo.toml b/apps/desktop/desktop_native/Cargo.toml
-index 2ba8f0d044..9632904bd7 100644
+index 2fd48d3856..99ac4f9b6b 100644
 --- a/apps/desktop/desktop_native/Cargo.toml
 +++ b/apps/desktop/desktop_native/Cargo.toml
-@@ -92,3 +92,6 @@ print_stdout = "deny"
- string_slice = "warn"
- unused_async = "deny"
- unwrap_used = "deny"
+@@ -107,3 +107,6 @@ cargo-sort = { version = "2.0.2", locked = true }
+ cargo-udeps = { version = "0.1.57", locked = true }
+ cargo-llvm-cov = { version = "0.6.16", locked = true }
+ cargo-xwin = { version = "0.23.0", locked = true }
 +
 +[patch.crates-io]
 +libc = { path = "../../../../rust-lang-libc" }
 -- 
-2.55.0
+2.56.0
 

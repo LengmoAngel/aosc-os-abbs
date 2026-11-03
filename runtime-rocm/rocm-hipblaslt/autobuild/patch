@@ -1,3 +1,4 @@
-abinfo "Patch hipBLASLt in Root Project..."
-cd "$SRCDIR/../.."
-ab_apply_patches "$SRCDIR"/autobuild/patches/0001-Fix-LLVM-intrinsic-name-mangling-in-buffer-load-store-declaration.patch
+cd "$SRCDIR"/../../shared/rocroller
+abinfo "Applying patches for rocroller ..."
+ab_apply_patches "$SRCDIR/autobuild/patches/0001-fix-rocroller-uint32_t.patch"
+cd "$SRCDIR"

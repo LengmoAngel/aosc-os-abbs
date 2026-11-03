@@ -1,0 +1,67 @@
+From e94d2b8ac83b8011be1a87812eb3ba409fb6b0fc Mon Sep 17 00:00:00 2001
+From: miwu04 <me@alanlin.icu>
+Date: Thu, 6 Aug 2026 22:53:08 +0800
+Subject: [PATCH 3/5] feat: use system aria2c-next
+
+---
+ src-tauri/src/engine/lifecycle.rs | 9 ++++-----
+ src-tauri/tauri.conf.json         | 2 +-
+ 2 files changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/src-tauri/src/engine/lifecycle.rs b/src-tauri/src/engine/lifecycle.rs
+index b8ce96a7..5156efff 100644
+--- a/src-tauri/src/engine/lifecycle.rs
++++ b/src-tauri/src/engine/lifecycle.rs
+@@ -8,7 +8,7 @@ use super::state::{path_to_safe_string, strip_ansi, EngineState};
+ use super::{valid_aria2_log_level, DEFAULT_ARIA2_LOG_LEVEL};
+ use tauri_plugin_store::StoreExt;
+ 
+-const ENGINE_SIDECAR_NAME: &str = "aria2-next";
++const ENGINE_BINARY_NAME: &str = "aria2-next";
+ pub(crate) const DEFAULT_RPC_PORT: u16 = 29100;
+ /// An engine left by a previous app instance exits within about a second of
+ /// its parent (`stop-with-process`), releasing the RPC port.
+@@ -175,8 +175,7 @@ fn spawn_engine(
+ ) -> Result<(Receiver<CommandEvent>, CommandChild), String> {
+     log::info!(target: "engine", event = "engine_spawn_started", argument_count = args.len(); "engine_spawn_started");
+     app.shell()
+-        .sidecar(ENGINE_SIDECAR_NAME)
+-        .map_err(|error| format!("Failed to create sidecar: {error}"))?
++        .command(ENGINE_BINARY_NAME)
+         .envs(sanitized_engine_proxy_env())
+         .args(args)
+         .spawn()
+@@ -293,7 +292,7 @@ fn monitor_engine(
+     });
+ }
+ 
+-/// Spawns Aria2 Next from the current persisted system configuration.
++/// Spawns the system-installed Aria2 Next executable with the current persisted configuration.
+ #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+ pub(crate) enum StartEngineOutcome {
+     Started,
+@@ -348,7 +347,7 @@ pub fn start_engine(app: &tauri::AppHandle) -> Result<StartEngineOutcome, crate:
+     Ok(StartEngineOutcome::Started)
+ }
+ 
+-/// Stops the owned sidecar and waits for the process to exit.
++/// Stops the owned Aria2 Next process and waits for the process to exit.
+ ///
+ /// A graceful stop gives the engine time to finish its own shutdown (Unix
+ /// receives SIGTERM; callers request the RPC shutdown first). The process is
+diff --git a/src-tauri/tauri.conf.json b/src-tauri/tauri.conf.json
+index f2fb7568..801b8e2d 100644
+--- a/src-tauri/tauri.conf.json
++++ b/src-tauri/tauri.conf.json
+@@ -38,7 +38,7 @@
+     "publisher": "AnInsomniacy",
+     "copyright": "Copyright (c) 2025-present AnInsomniacy",
+     "createUpdaterArtifacts": false,
+-    "externalBin": ["binaries/aria2-next", "generated-binaries/rayburst-browser-launcher"],
++    "externalBin": ["generated-binaries/rayburst-browser-launcher"],
+     "resources": [
+       "data/ed2k-bootstrap/server.met",
+       "data/ed2k-bootstrap/nodes.dat",
+-- 
+2.56.0
+

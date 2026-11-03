@@ -1,5 +1,4 @@
-VER=8.21.0
-REL=1
+VER=8.23.0
 SRCS="tbl::https://curl.se/download/curl-$VER.tar.xz"
-CHKSUMS="sha256::aa1b66a70eace83dc624508745646c08ae561de512ab403adffb93ac87fc72e6"
+CHKSUMS="sha256::8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5"
 CHKUPDATE="anitya::id=381"

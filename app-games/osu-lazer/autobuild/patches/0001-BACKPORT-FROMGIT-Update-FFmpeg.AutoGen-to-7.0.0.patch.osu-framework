@@ -1,0 +1,205 @@
+From ec56d4d1c284d9a5cc41a34237671c02d2d3909f Mon Sep 17 00:00:00 2001
+From: FreezyLemon <contact@freezylemon.com>
+Date: Wed, 3 Apr 2024 20:55:23 +0200
+Subject: [PATCH 1/4] Update FFmpeg.AutoGen to 7.0.0
+
+---
+ .../Graphics/Video/FFmpegExtensions.cs        |  3 -
+ .../Graphics/Video/FFmpegFunctionResolver.cs  | 72 +++++++++++++++++++
+ osu.Framework/Graphics/Video/VideoDecoder.cs  | 52 +-------------
+ osu.Framework/osu.Framework.csproj            |  2 +-
+ 4 files changed, 74 insertions(+), 55 deletions(-)
+ create mode 100644 osu.Framework/Graphics/Video/FFmpegFunctionResolver.cs
+
+diff --git a/osu.Framework/Graphics/Video/FFmpegExtensions.cs b/osu.Framework/Graphics/Video/FFmpegExtensions.cs
+index 778af3f2b..89608ce18 100644
+--- a/osu.Framework/Graphics/Video/FFmpegExtensions.cs
++++ b/osu.Framework/Graphics/Video/FFmpegExtensions.cs
+@@ -16,8 +16,6 @@ internal static bool IsHardwarePixelFormat(this AVPixelFormat pixFmt)
+                 case AVPixelFormat.AV_PIX_FMT_VDPAU:
+                 case AVPixelFormat.AV_PIX_FMT_CUDA:
+                 case AVPixelFormat.AV_PIX_FMT_VAAPI:
+-                case AVPixelFormat.AV_PIX_FMT_VAAPI_IDCT:
+-                case AVPixelFormat.AV_PIX_FMT_VAAPI_MOCO:
+                 case AVPixelFormat.AV_PIX_FMT_DXVA2_VLD:
+                 case AVPixelFormat.AV_PIX_FMT_QSV:
+                 case AVPixelFormat.AV_PIX_FMT_VIDEOTOOLBOX:
+@@ -28,7 +26,6 @@ internal static bool IsHardwarePixelFormat(this AVPixelFormat pixFmt)
+                 case AVPixelFormat.AV_PIX_FMT_MEDIACODEC:
+                 case AVPixelFormat.AV_PIX_FMT_VULKAN:
+                 case AVPixelFormat.AV_PIX_FMT_MMAL:
+-                case AVPixelFormat.AV_PIX_FMT_XVMC:
+                     return true;
+ 
+                 default:
+diff --git a/osu.Framework/Graphics/Video/FFmpegFunctionResolver.cs b/osu.Framework/Graphics/Video/FFmpegFunctionResolver.cs
+new file mode 100644
+index 000000000..998cb74cf
+--- /dev/null
++++ b/osu.Framework/Graphics/Video/FFmpegFunctionResolver.cs
+@@ -0,0 +1,72 @@
++// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
++// See the LICENCE file in the repository root for full licence text.
++
++using System;
++using System.Collections.Generic;
++using System.Runtime.InteropServices;
++using FFmpeg.AutoGen;
++
++namespace osu.Framework.Graphics.Video
++{
++    /// <summary>
++    /// Resolves the FFmpeg native functions required for video playback.
++    ///
++    /// If you want to support a different set of libraries, consider implementing the <see cref="IFunctionResolver"/> interface yourself.
++    /// </summary>
++    public sealed class FFmpegFunctionResolver : IFunctionResolver
++    {
++        // The order here matters because of inter-library dependencies.
++        // avcodec and swscale depend on avutil, avformat depends on avcodec.
++        private static readonly string[] libraries = ["avutil", "avcodec", "swscale", "avformat"];
++
++        private readonly Dictionary<string, IntPtr> loadedLibraries = new Dictionary<string, IntPtr>(libraries.Length);
++
++        /// <summary>
++        /// Load the default set of FFmpeg libraries.
++        /// </summary>
++        /// <exception cref="DllNotFoundException">If one of the libraries cannot be found in the DLL directory.</exception>
++        /// <exception cref="BadImageFormatException">If one of the library files is invalid.</exception>
++        public FFmpegFunctionResolver()
++        {
++            foreach (string library in libraries)
++                loadLibrary(library);
++        }
++
++        private void loadLibrary(string libraryName)
++        {
++            string libraryFileName = getLibraryFileName(libraryName);
++            IntPtr handle = NativeLibrary.Load(libraryFileName, RuntimeInfo.EntryAssembly, DllImportSearchPath.UseDllDirectoryForDependencies);
++
++            loadedLibraries.Add(libraryName, handle);
++        }
++
++        public T GetFunctionDelegate<T>(string libraryName, string functionName, bool throwOnError = true)
++        {
++            if (!loadedLibraries.TryGetValue(libraryName, out IntPtr libraryHandle))
++                throw new InvalidOperationException($"Required library {getLibraryFileName(libraryName)} was not loaded on initialization.");
++
++            IntPtr funcPtr = NativeLibrary.GetExport(libraryHandle, functionName);
++            return Marshal.GetDelegateForFunctionPointer<T>(funcPtr);
++        }
++
++        private string getLibraryFileName(string libraryName)
++        {
++            int version = ffmpeg.LibraryVersionMap[libraryName];
++
++            switch (RuntimeInfo.OS)
++            {
++                case RuntimeInfo.Platform.Windows:
++                    return $"{libraryName}-{version}.dll";
++
++                case RuntimeInfo.Platform.Linux:
++                    return $"lib{libraryName}.so.{version}";
++
++                case RuntimeInfo.Platform.macOS:
++                    return $"lib{libraryName}.{version}.dylib";
++
++                default:
++                    throw new PlatformNotSupportedException();
++            }
++        }
++    }
++}
+diff --git a/osu.Framework/Graphics/Video/VideoDecoder.cs b/osu.Framework/Graphics/Video/VideoDecoder.cs
+index 6b8638a80..a96b8d100 100644
+--- a/osu.Framework/Graphics/Video/VideoDecoder.cs
++++ b/osu.Framework/Graphics/Video/VideoDecoder.cs
+@@ -22,7 +22,6 @@
+ using osu.Framework.Graphics.Rendering;
+ using osu.Framework.Logging;
+ using osu.Framework.Platform;
+-using osu.Framework.Platform.Linux.Native;
+ 
+ namespace osu.Framework.Graphics.Video
+ {
+@@ -109,25 +108,6 @@ public unsafe class VideoDecoder : IDisposable
+ 
+         internal bool Looping;
+ 
+-        static VideoDecoder()
+-        {
+-            if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
+-            {
+-                void loadVersionedLibraryGlobally(string name)
+-                {
+-                    int version = FFmpeg.AutoGen.ffmpeg.LibraryVersionMap[name];
+-                    Library.Load($"lib{name}.so.{version}", Library.LoadFlags.RTLD_LAZY | Library.LoadFlags.RTLD_GLOBAL);
+-                }
+-
+-                // FFmpeg.AutoGen doesn't load libraries as RTLD_GLOBAL, so we must load them ourselves to fix inter-library dependencies
+-                // otherwise they would fallback to the system-installed libraries that can differ in version installed.
+-                loadVersionedLibraryGlobally("avutil");
+-                loadVersionedLibraryGlobally("avcodec");
+-                loadVersionedLibraryGlobally("avformat");
+-                loadVersionedLibraryGlobally("swscale");
+-            }
+-        }
+-
+         /// <summary>
+         /// Creates a new video decoder that decodes the given video file.
+         /// </summary>
+@@ -817,37 +797,7 @@ HardwareVideoDecoder targetHwDecoders
+ 
+         protected virtual FFmpegFuncs CreateFuncs()
+         {
+-            // other frameworks should handle native libraries themselves
+-            FFmpeg.AutoGen.ffmpeg.GetOrLoadLibrary = name =>
+-            {
+-                int version = FFmpeg.AutoGen.ffmpeg.LibraryVersionMap[name];
+-
+-                // "lib" prefix and extensions are resolved by .net core
+-                string libraryName;
+-
+-                switch (RuntimeInfo.OS)
+-                {
+-                    case RuntimeInfo.Platform.macOS:
+-                        libraryName = $"{name}.{version}";
+-                        break;
+-
+-                    case RuntimeInfo.Platform.Windows:
+-                        libraryName = $"{name}-{version}";
+-                        break;
+-
+-                    // To handle versioning in Linux, we have to specify the entire file name
+-                    // because Linux uses a version suffix after the file extension (e.g. libavutil.so.56)
+-                    // More info: https://learn.microsoft.com/en-us/dotnet/standard/native-interop/native-library-loading?view=net-6.0
+-                    case RuntimeInfo.Platform.Linux:
+-                        libraryName = $"lib{name}.so.{version}";
+-                        break;
+-
+-                    default:
+-                        throw new ArgumentOutOfRangeException(nameof(RuntimeInfo.OS), RuntimeInfo.OS, null);
+-                }
+-
+-                return NativeLibrary.Load(libraryName, RuntimeInfo.EntryAssembly, DllImportSearchPath.UseDllDirectoryForDependencies | DllImportSearchPath.SafeDirectories);
+-            };
++            DynamicallyLoadedBindings.FunctionResolver ??= new FFmpegFunctionResolver();
+ 
+             return new FFmpegFuncs
+             {
+diff --git a/osu.Framework/osu.Framework.csproj b/osu.Framework/osu.Framework.csproj
+index da83d767d..bdc3e2157 100644
+--- a/osu.Framework/osu.Framework.csproj
++++ b/osu.Framework/osu.Framework.csproj
+@@ -19,7 +19,7 @@
+     <PackageTags>osu game framework</PackageTags>
+   </PropertyGroup>
+   <ItemGroup Label="Package References">
+-    <PackageReference Include="FFmpeg.AutoGen" Version="4.3.0.1" />
++    <PackageReference Include="FFmpeg.AutoGen" Version="8.1.0" />
+     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="10.0.11" />
+     <PackageReference Include="ppy.managed-midi" Version="1.10.2" />
+     <PackageReference Include="ppy.ManagedBass" Version="2022.1216.0" />
+-- 
+2.55.0
+
